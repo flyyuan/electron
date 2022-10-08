@@ -43,7 +43,7 @@
 #include "shell/common/crash_keys.h"
 #endif
 
-#define ELECTRON_BUILTIN_MODULES(V)      \
+#define ELECTRON_BROWSER_MODULES(V)      \
   V(electron_browser_app)                \
   V(electron_browser_auto_updater)       \
   V(electron_browser_browser_view)       \
@@ -75,18 +75,22 @@
   V(electron_browser_web_contents_view)  \
   V(electron_browser_web_frame_main)     \
   V(electron_browser_web_view_manager)   \
-  V(electron_browser_window)             \
-  V(electron_common_asar)                \
-  V(electron_common_clipboard)           \
-  V(electron_common_command_line)        \
-  V(electron_common_environment)         \
-  V(electron_common_features)            \
-  V(electron_common_native_image)        \
-  V(electron_common_shell)               \
-  V(electron_common_v8_util)             \
-  V(electron_renderer_context_bridge)    \
-  V(electron_renderer_crash_reporter)    \
-  V(electron_renderer_ipc)               \
+  V(electron_browser_window)
+
+#define ELECTRON_COMMON_MODULES(V) \
+  V(electron_common_asar)          \
+  V(electron_common_clipboard)     \
+  V(electron_common_command_line)  \
+  V(electron_common_environment)   \
+  V(electron_common_features)      \
+  V(electron_common_native_image)  \
+  V(electron_common_shell)         \
+  V(electron_common_v8_util)
+
+#define ELECTRON_RENDERER_MODULES(V)  \
+  V(electron_renderer_context_bridge) \
+  V(electron_renderer_crash_reporter) \
+  V(electron_renderer_ipc)            \
   V(electron_renderer_web_frame)
 
 #define ELECTRON_VIEWS_MODULES(V) V(electron_browser_image_view)
@@ -101,7 +105,9 @@
 // forward declaration. The definitions are in each module's
 // implementation when calling the NODE_LINKED_MODULE_CONTEXT_AWARE.
 #define V(modname) void _register_##modname();
-ELECTRON_BUILTIN_MODULES(V)
+ELECTRON_BROWSER_MODULES(V)
+ELECTRON_COMMON_MODULES(V)
+ELECTRON_RENDERER_MODULES(V)
 #if BUILDFLAG(ENABLE_VIEWS_API)
 ELECTRON_VIEWS_MODULES(V)
 #endif
@@ -351,7 +357,13 @@ NodeBindings::~NodeBindings() {
 
 void NodeBindings::RegisterBuiltinModules() {
 #define V(modname) _register_##modname();
-  ELECTRON_BUILTIN_MODULES(V)
+  if (gin_helper::Locker::IsBrowserProcess()) {
+    ELECTRON_BROWSER_MODULES(V)
+  }
+  ELECTRON_COMMON_MODULES(V)
+  if (!gin_helper::Locker::IsBrowserProcess()) {
+    ELECTRON_RENDERER_MODULES(V)
+  }
 #if BUILDFLAG(ENABLE_VIEWS_API)
   ELECTRON_VIEWS_MODULES(V)
 #endif
