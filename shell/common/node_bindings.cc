@@ -369,7 +369,7 @@ void NodeBindings::RegisterBuiltinModules() {
 #endif
   }
   ELECTRON_COMMON_MODULES(V)
-  if (!gin_helper::Locker::IsBrowserProcess()) {
+  if (process_type == ::switches::kRendererProcess) {
     ELECTRON_RENDERER_MODULES(V)
   }
 #if DCHECK_IS_ON()
