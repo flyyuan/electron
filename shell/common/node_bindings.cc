@@ -357,7 +357,9 @@ NodeBindings::~NodeBindings() {
 
 void NodeBindings::RegisterBuiltinModules() {
 #define V(modname) _register_##modname();
-  if (gin_helper::Locker::IsBrowserProcess()) {
+  auto* command_line = base::CommandLine::ForCurrentProcess();
+  std::string process_type = command_line->GetSwitchValueASCII(::switches::kProcessType);
+  if (process_type.empty()) {
     ELECTRON_BROWSER_MODULES(V)
 #if BUILDFLAG(ENABLE_VIEWS_API)
     ELECTRON_VIEWS_MODULES(V)
