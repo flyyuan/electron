@@ -359,17 +359,17 @@ void NodeBindings::RegisterBuiltinModules() {
 #define V(modname) _register_##modname();
   if (gin_helper::Locker::IsBrowserProcess()) {
     ELECTRON_BROWSER_MODULES(V)
+#if BUILDFLAG(ENABLE_VIEWS_API)
+    ELECTRON_VIEWS_MODULES(V)
+#endif
+#if BUILDFLAG(ENABLE_DESKTOP_CAPTURER)
+    ELECTRON_DESKTOP_CAPTURER_MODULE(V)
+#endif
   }
   ELECTRON_COMMON_MODULES(V)
   if (!gin_helper::Locker::IsBrowserProcess()) {
     ELECTRON_RENDERER_MODULES(V)
   }
-#if BUILDFLAG(ENABLE_VIEWS_API)
-  ELECTRON_VIEWS_MODULES(V)
-#endif
-#if BUILDFLAG(ENABLE_DESKTOP_CAPTURER)
-  ELECTRON_DESKTOP_CAPTURER_MODULE(V)
-#endif
 #if DCHECK_IS_ON()
   ELECTRON_TESTING_MODULE(V)
 #endif
